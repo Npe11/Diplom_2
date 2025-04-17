@@ -1,6 +1,8 @@
 package api;
 
 import clients.UserClient;
+import models.CourierModel;
+import com.github.javafaker.Faker;
 import io.qameta.allure.Step;
 import io.restassured.response.Response;
 import org.junit.After;
@@ -11,17 +13,21 @@ import static org.junit.Assert.*;
 
 public class UserLoginTest {
 
+    private Faker faker;
     private String uniqueEmail;
-    private final String password = "password";
-    private final String name = "TestUser";
+    private String password;
+    private String name;
     private String accessToken;
     private UserClient userClient;
 
     @Before
     public void setUp() {
-        uniqueEmail = "testuser" + System.currentTimeMillis() + "@example.com";
+        faker = new Faker();
+        uniqueEmail = faker.internet().emailAddress();
+        password = faker.internet().password();
+        name = faker.name().fullName();
         userClient = new UserClient();
-        Response regResponse = userClient.createUser(uniqueEmail, password, name);
+        Response regResponse = userClient.createUser(new CourierModel(uniqueEmail, password, name));
         accessToken = regResponse.jsonPath().getString("accessToken");
     }
 
@@ -30,7 +36,6 @@ public class UserLoginTest {
         if (accessToken != null) {
             userClient.deleteUser(accessToken);
         }
-
         accessToken = null;
         userClient = null;
     }
@@ -38,7 +43,8 @@ public class UserLoginTest {
     @Test
     @Step("Логин существующего пользователя")
     public void testLoginExistingUser() {
-        Response loginResponse = userClient.loginUser(uniqueEmail, password);
+        CourierModel login = new CourierModel(uniqueEmail, password, null);
+        Response loginResponse = userClient.loginUser(login);
 
         assertEquals("Логин завершился с ошибочным статусом", 200, loginResponse.statusCode());
         assertTrue("Поле success должно быть true", loginResponse.jsonPath().getBoolean("success"));
@@ -51,20 +57,20 @@ public class UserLoginTest {
     @Test
     @Step("Логин с не правильными данными: email")
     public void testLoginWithInvalidEmail() {
-        Response loginResponse = userClient.loginUser("wrongEmail@test.com", password);
+        CourierModel wrongLogin = new CourierModel("wrongEmail@test.com", password, null);
+        Response loginResponse = userClient.loginUser(wrongLogin);
 
-        assertEquals("Ожидается статус 401 Unauthorized при неверном пароле", 401, loginResponse.statusCode());
-        String errorMessage = loginResponse.jsonPath().getString("message");
-        assertEquals("Сообщение об ошибке не соответствует", "email or password are incorrect", errorMessage);
+        assertEquals("Ожидается статус 401 Unauthorized при неверном email", 401, loginResponse.statusCode());
+        assertEquals("email or password are incorrect", loginResponse.jsonPath().getString("message"));
     }
 
     @Test
     @Step("Логин с не правильными данными: password")
     public void testLoginWithInvalidPassword() {
-        Response loginResponse = userClient.loginUser(uniqueEmail, "wrongPassword");
+        CourierModel wrongLogin = new CourierModel(uniqueEmail, "wrongPassword", null);
+        Response loginResponse = userClient.loginUser(wrongLogin);
 
         assertEquals("Ожидается статус 401 Unauthorized при неверном пароле", 401, loginResponse.statusCode());
-        String errorMessage = loginResponse.jsonPath().getString("message");
-        assertEquals("Сообщение об ошибке не соответствует", "email or password are incorrect", errorMessage);
+        assertEquals("email or password are incorrect", loginResponse.jsonPath().getString("message"));
     }
 }

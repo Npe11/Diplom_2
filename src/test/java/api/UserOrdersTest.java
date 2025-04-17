@@ -3,8 +3,10 @@ package api;
 import clients.IngredientClient;
 import clients.OrderClient;
 import clients.UserClient;
+import com.github.javafaker.Faker;
 import io.qameta.allure.Step;
 import io.restassured.response.Response;
+import models.CourierModel;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -16,9 +18,10 @@ import static org.junit.Assert.*;
 
 public class UserOrdersTest {
 
+    private Faker faker;
     private String uniqueEmail;
-    private final String password = "password";
-    private final String name = "OrderUserTest";
+    private String password;
+    private String name;
     private String accessToken;
     private UserClient userClient;
     private OrderClient orderClient;
@@ -26,12 +29,17 @@ public class UserOrdersTest {
 
     @Before
     public void setUp() {
-        uniqueEmail = "orderuser" + System.currentTimeMillis() + "@example.com";
+        faker = new Faker();
+        name = faker.name().fullName();
+        password = faker.internet().password();
+        uniqueEmail = faker.internet().emailAddress();
+
         userClient = new UserClient();
         orderClient = new OrderClient();
         ingredientClient = new IngredientClient();
 
-        Response regResponse = userClient.createUser(uniqueEmail, password, name);
+        CourierModel user = new CourierModel(uniqueEmail, password, name);
+        Response regResponse = userClient.createUser(user);
         accessToken = regResponse.jsonPath().getString("accessToken");
 
         List<String> validIngredients = getValidIngredientIds();
@@ -43,7 +51,6 @@ public class UserOrdersTest {
         if (accessToken != null) {
             userClient.deleteUser(accessToken);
         }
-
         accessToken = null;
         userClient = null;
         orderClient = null;
