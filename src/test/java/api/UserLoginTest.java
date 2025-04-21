@@ -3,7 +3,8 @@ package api;
 import clients.UserClient;
 import models.CourierModel;
 import com.github.javafaker.Faker;
-import io.qameta.allure.Step;
+import io.qameta.allure.Description;
+import io.qameta.allure.junit4.DisplayName;
 import io.restassured.response.Response;
 import org.junit.After;
 import org.junit.Before;
@@ -41,7 +42,8 @@ public class UserLoginTest {
     }
 
     @Test
-    @Step("Логин существующего пользователя")
+    @DisplayName("Логин существующего пользователя")
+    @Description("Проверяем, что зарегистрированный пользователь может войти, и в ответе возвращается корректный accessToken и email.")
     public void testLoginExistingUser() {
         CourierModel login = new CourierModel(uniqueEmail, password, null);
         Response loginResponse = userClient.loginUser(login);
@@ -55,7 +57,8 @@ public class UserLoginTest {
     }
 
     @Test
-    @Step("Логин с не правильными данными: email")
+    @DisplayName("Логин с некорректным email")
+    @Description("Проверяем, что при вводе неверного email API возвращает 401 и сообщение об ошибке.")
     public void testLoginWithInvalidEmail() {
         CourierModel wrongLogin = new CourierModel("wrongEmail@test.com", password, null);
         Response loginResponse = userClient.loginUser(wrongLogin);
@@ -65,7 +68,8 @@ public class UserLoginTest {
     }
 
     @Test
-    @Step("Логин с не правильными данными: password")
+    @DisplayName("Логин с некорректным паролем")
+    @Description("Проверяем, что при вводе неверного пароля API возвращает 401 и сообщение об ошибке.")
     public void testLoginWithInvalidPassword() {
         CourierModel wrongLogin = new CourierModel(uniqueEmail, "wrongPassword", null);
         Response loginResponse = userClient.loginUser(wrongLogin);

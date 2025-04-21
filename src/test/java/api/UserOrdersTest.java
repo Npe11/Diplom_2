@@ -4,7 +4,8 @@ import clients.IngredientClient;
 import clients.OrderClient;
 import clients.UserClient;
 import com.github.javafaker.Faker;
-import io.qameta.allure.Step;
+import io.qameta.allure.Description;
+import io.qameta.allure.junit4.DisplayName;
 import io.restassured.response.Response;
 import models.CourierModel;
 import org.junit.After;
@@ -57,7 +58,6 @@ public class UserOrdersTest {
         ingredientClient = null;
     }
 
-    @Step("Получить валидные идентификаторы ингредиентов")
     private List<String> getValidIngredientIds() {
         Response ingredientResponse = ingredientClient.getIngredients();
         List<String> ingredientIds = ingredientResponse.jsonPath().getList("data._id");
@@ -65,7 +65,8 @@ public class UserOrdersTest {
     }
 
     @Test
-    @Step("Получить список ордеров с авторизацией")
+    @DisplayName("Получение списка ордеров с авторизацией")
+    @Description("Проверяем, что авторизованный пользователь может получить список своих заказов и ответ содержит success=true и список orders.")
     public void testGetUserOrdersWithAuthorization() {
         Response response = orderClient.getUserOrders(accessToken);
 
@@ -75,7 +76,8 @@ public class UserOrdersTest {
     }
 
     @Test
-    @Step("Получить список ордеров без авторизации")
+    @DisplayName("Получение списка ордеров без авторизации")
+    @Description("Проверяем, что при отсутствии токена доступа API возвращает 401 и соответствующее сообщение об ошибке.")
     public void testGetUserOrdersWithoutAuthorization() {
         Response response = orderClient.getUserOrders("");
 

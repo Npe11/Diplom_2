@@ -3,7 +3,8 @@ package api;
 import clients.UserClient;
 import models.CourierModel;
 import com.github.javafaker.Faker;
-import io.qameta.allure.Step;
+import io.qameta.allure.Description;
+import io.qameta.allure.junit4.DisplayName;
 import io.restassured.response.Response;
 import org.junit.After;
 import org.junit.Before;
@@ -38,7 +39,8 @@ public class UserRegistrationTest {
     }
 
     @Test
-    @Step("Регистрация уникального пользователя")
+    @DisplayName("Регистрация уникального пользователя")
+    @Description("Проверяем, что пользователь с уникальными email, password и name может успешно зарегистрироваться.")
     public void testRegisterUniqueUser() {
         CourierModel user = new CourierModel(uniqueEmail, password, name);
         Response response = userClient.createUser(user);
@@ -53,7 +55,8 @@ public class UserRegistrationTest {
     }
 
     @Test
-    @Step("Попытка дважды зарегистрировать пользователя с одинаковыми данными")
+    @DisplayName("Повторная регистрация того же пользователя")
+    @Description("Проверяем, что при попытке зарегистрировать уже существующего пользователя API возвращает 403 и сообщение об ошибке.")
     public void testRegisterAlreadyRegisteredUser() {
         CourierModel user = new CourierModel(uniqueEmail, password, name);
         Response firstResponse = userClient.createUser(user);
@@ -66,7 +69,8 @@ public class UserRegistrationTest {
     }
 
     @Test
-    @Step("Попытка зарегистрировать пользователя без одного из обязательных полей: name")
+    @DisplayName("Регистрация без имени")
+    @Description("Проверяем, что при отсутствии поля name API возвращает 403 и сообщение об обязательных полях.")
     public void testRegisterUserMissingNameField() {
         CourierModel userMissingName = new CourierModel(uniqueEmail, password, null);
         Response response = userClient.createUser(userMissingName);
@@ -76,20 +80,22 @@ public class UserRegistrationTest {
     }
 
     @Test
-    @Step("Попытка зарегистрировать пользователя без одного из обязательных полей: password")
+    @DisplayName("Регистрация без пароля")
+    @Description("Проверяем, что при отсутствии поля password API возвращает 403 и сообщение об обязательных полях.")
     public void testRegisterUserMissingPasswordField() {
-        CourierModel userMissingName = new CourierModel(uniqueEmail, null, name);
-        Response response = userClient.createUser(userMissingName);
+        CourierModel userMissingPassword = new CourierModel(uniqueEmail, null, name);
+        Response response = userClient.createUser(userMissingPassword);
 
         assertEquals(403, response.statusCode());
         assertEquals("Email, password and name are required fields", response.jsonPath().getString("message"));
     }
 
     @Test
-    @Step("Попытка зарегистрировать пользователя без одного из обязательных полей: email")
+    @DisplayName("Регистрация без email")
+    @Description("Проверяем, что при отсутствии поля email API возвращает 403 и сообщение об обязательных полях.")
     public void testRegisterUserMissingEmailField() {
-        CourierModel userMissingName = new CourierModel(null, password, name);
-        Response response = userClient.createUser(userMissingName);
+        CourierModel userMissingEmail = new CourierModel(null, password, name);
+        Response response = userClient.createUser(userMissingEmail);
 
         assertEquals(403, response.statusCode());
         assertEquals("Email, password and name are required fields", response.jsonPath().getString("message"));

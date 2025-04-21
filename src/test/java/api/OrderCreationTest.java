@@ -4,7 +4,8 @@ import clients.IngredientClient;
 import clients.OrderClient;
 import clients.UserClient;
 import com.github.javafaker.Faker;
-import io.qameta.allure.Step;
+import io.qameta.allure.Description;
+import io.qameta.allure.junit4.DisplayName;
 import io.restassured.response.Response;
 import models.CourierModel;
 import org.junit.After;
@@ -50,13 +51,8 @@ public class OrderCreationTest {
         if (accessToken != null) {
             userClient.deleteUser(accessToken);
         }
-        accessToken = null;
-        userClient = null;
-        orderClient = null;
-        ingredientClient = null;
     }
 
-    @Step("Получить валидные идентификаторы ингредиентов")
     private List<String> getValidIngredientIds() {
         Response ingredientResponse = ingredientClient.getIngredients();
         List<String> ingredientIds = ingredientResponse.jsonPath().getList("data._id");
@@ -64,7 +60,8 @@ public class OrderCreationTest {
     }
 
     @Test
-    @Step("Успешное создание заказа с авторизацией")
+    @DisplayName("Успешное создание заказа с авторизацией")
+    @Description("Проверяем, что авторизованный пользователь может создать заказ из валидных ингредиентов и получить номер.")
     public void testCreateOrderWithAuthorizationAndValidIngredients() {
         List<String> validIngredients = getValidIngredientIds();
 
@@ -75,7 +72,8 @@ public class OrderCreationTest {
     }
 
     @Test
-    @Step("Успешное создание заказа без авторизации")
+    @DisplayName("Успешное создание заказа без авторизации")
+    @Description("Проверяем, что неавторизованный пользователь тоже может создать заказ из валидных ингредиентов.")
     public void testCreateOrderWithoutAuthorizationAndValidIngredients() {
         List<String> validIngredients = getValidIngredientIds();
 
@@ -86,7 +84,8 @@ public class OrderCreationTest {
     }
 
     @Test
-    @Step("Попытка создания заказа без ингридиентов")
+    @DisplayName("Создание заказа без ингредиентов")
+    @Description("Проверяем, что при отсутствии списка ингредиентов сервер вернёт 400 и сообщение об ошибке.")
     public void testCreateOrderWithAuthorizationButNoIngredients() {
         List<String> emptyIngredients = Collections.emptyList();
 
@@ -97,7 +96,8 @@ public class OrderCreationTest {
     }
 
     @Test
-    @Step("Попытка создания заказа с неправильным хэшом ингридиента")
+    @DisplayName("Создание заказа с неверным хешем ингредиента")
+    @Description("Проверяем, что при передаче некорректного ID ингредиента сервер возвращает 500.")
     public void testCreateOrderWithAuthorizationAndInvalidIngredient() {
         List<String> invalidIngredients = Arrays.asList("invalidIngredientHash");
 

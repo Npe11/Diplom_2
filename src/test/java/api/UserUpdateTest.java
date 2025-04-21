@@ -3,7 +3,8 @@ package api;
 import clients.UserClient;
 import com.github.javafaker.Faker;
 import models.CourierModel;
-import io.qameta.allure.Step;
+import io.qameta.allure.Description;
+import io.qameta.allure.junit4.DisplayName;
 import io.restassured.response.Response;
 import org.junit.After;
 import org.junit.Before;
@@ -49,7 +50,8 @@ public class UserUpdateTest {
     }
 
     @Test
-    @Step("Обновление пользователя с авторизацией: name")
+    @DisplayName("Обновление имени пользователя с авторизацией")
+    @Description("Проверяем, что авторизованный пользователь может обновить своё имя.")
     public void testUpdateUserNameWithAuthorization() {
         Map<String, String> updates = new HashMap<>();
         updates.put("name", newName);
@@ -60,7 +62,8 @@ public class UserUpdateTest {
     }
 
     @Test
-    @Step("Обновление пользователя с авторизацией: email")
+    @DisplayName("Обновление email пользователя с авторизацией")
+    @Description("Проверяем, что авторизованный пользователь может обновить свой email.")
     public void testUpdateUserEmailWithAuthorization() {
         Map<String, String> updates = new HashMap<>();
         updates.put("email", newEmail);
@@ -71,7 +74,8 @@ public class UserUpdateTest {
     }
 
     @Test
-    @Step("Попытка обновления пользователя без авторизации")
+    @DisplayName("Обновление пользователя без авторизации")
+    @Description("Проверяем, что при попытке обновить данные без токена возвращается 401 и сообщение об ошибке.")
     public void testUpdateUserWithoutAuthorization() {
         Map<String, String> updates = new HashMap<>();
         updates.put("email", newEmail);
@@ -79,6 +83,6 @@ public class UserUpdateTest {
 
         Response updateResponse = userClient.updateUser(updates, "");
         assertEquals("Ожидается код 401 при обновлении без токена", 401, updateResponse.statusCode());
-        assertEquals("You should be authorised", updateResponse.jsonPath().getString("message"));
+        assertEquals("Сообщение об ошибке не соответствует", "You should be authorised", updateResponse.jsonPath().getString("message"));
     }
 }
